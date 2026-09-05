@@ -27,6 +27,7 @@ Maintain a standard-library-only vertical slice that discovers the environment, 
 - [x] Allow approved SSH, exact-path permission, and supported package actions in root containers.
 - [x] Show observe, reason, plan, ask, act, verify, and report as distinct runtime stages.
 - [x] Record approved and not-approved actions plus before/after findings in artifacts.
+- [x] Install development test dependencies in the demo image through an isolated virtual environment.
 
 ## Assumptions
 

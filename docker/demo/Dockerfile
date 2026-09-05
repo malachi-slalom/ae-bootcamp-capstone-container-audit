@@ -11,9 +11,17 @@ RUN apt-get update && apt-get install -y \
     sudo \
     python3 \
     python3-pip \
+    python3-venv \
     ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-dev.txt /tmp/requirements-dev.txt
+RUN python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements-dev.txt \
+    && rm /tmp/requirements-dev.txt
+
+ENV PATH="/opt/venv/bin:${PATH}"
 
 # Prepare runtime dirs
 RUN mkdir -p /run/sshd /var/run/sshd /opt/demo /srv/demo /etc/issue.d

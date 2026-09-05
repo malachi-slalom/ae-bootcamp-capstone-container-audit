@@ -111,4 +111,7 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
+The demo image installs `requirements-dev.txt` into `/opt/venv`, so `pytest` and
+`python3 -m pytest` are available after running `./scripts/run_demo_container.sh`.
+
 Tests use temporary files and never modify real system configuration.
