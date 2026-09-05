@@ -66,7 +66,9 @@ def test_workflow_reports_agent_stages_in_order(tmp_path: Path) -> None:
     assert "report-only" in events[4][1]
 
 
-def test_approved_action_is_rechecked_and_reported(tmp_path: Path, monkeypatch) -> None:
+def test_approved_action_is_rechecked_and_reported(
+    tmp_path: Path, monkeypatch
+) -> None:
     monkeypatch.setattr(src.checks, "DEMO_FILE_PATHS", {})
     config = tmp_path / "sshd_config"
     config.write_text("PermitRootLogin yes\nPasswordAuthentication no\n", encoding="utf-8")
