@@ -96,3 +96,4 @@ Primary invocation should be:
 
 ```bash
 python -m src.main
+```

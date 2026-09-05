@@ -66,3 +66,49 @@ Primary entrypoint:
 
 ```bash
 python -m src.main
+```
+
+When attached to a terminal, the CLI offers three modes:
+
+- `report`: make no changes
+- `apply`: apply every proposed low-risk action
+- `review`: approve proposed actions one at a time
+
+For a deterministic report-only run:
+
+```bash
+python -m src.main --non-interactive
+```
+
+To explicitly authorize all proposed low-risk actions without prompts:
+
+```bash
+python -m src.main --non-interactive --mode apply
+```
+
+The command streams each stage as it occurs, including interpreted findings and the safe plan before approval. Markdown reports and JSON evidence are written to `outputs/` by default. The artifacts retain raw checks, planning decisions, approvals, action results, and targeted before/after verification. Use `--output-dir PATH` to select another location.
+
+## Checks and planning
+
+Fallback checks always run and cover SSH configuration, SSH config permissions, unattended-upgrades availability, Lynis availability, and execution privilege. If Lynis is installed, its quick audit also runs; a Lynis failure does not prevent fallback checks or reporting.
+
+Findings are normalized with severity, evidence, applicability, recommendation, and optional remediation type. Containers and unprivileged sessions still produce reports, but no remediation plan is executable in those environments.
+
+## Safety boundaries
+
+The executor accepts only fixed action types for:
+
+- setting `PermitRootLogin no` or `PasswordAuthentication no` in the discovered SSH config
+- removing group/world write bits from that exact SSH config path
+- installing `lynis` or `unattended-upgrades` with `apt-get`
+
+Approval is mandatory. Non-interactive runs default to report-only unless `--mode apply` is explicitly supplied. The project never executes model-generated commands and does not modify PAM, firewall rules, sysctls, users, passwords, or broad filesystem trees.
+
+## Tests
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+Tests use temporary files and never modify real system configuration.

@@ -6,18 +6,22 @@ Build a thin, standard-library-only vertical slice first: discover the environme
 
 ## Ordered Task List
 
-- [ ] Define environment, finding, action, and result dataclasses.
-- [ ] Implement machine-readable discovery script and Python wrapper.
-- [ ] Implement mandatory fallback checks and optional Lynis integration.
-- [ ] Normalize all check output into findings.
-- [ ] Generate plans containing only explicit low-risk action types.
-- [ ] Implement interactive approval and non-interactive report-only behavior.
-- [ ] Implement narrow, testable SSH and file-permission remediations.
-- [ ] Re-run checks after the approval stage and compare results.
-- [ ] Write raw JSON artifacts and a final Markdown report under `outputs/`.
-- [ ] Wire `python -m src.main` and add CLI options.
-- [ ] Add unit and end-to-end smoke tests that never require root.
-- [ ] Refine README usage and safety documentation.
+- [x] Define environment, finding, action, and result dataclasses.
+- [x] Implement machine-readable discovery script and Python wrapper.
+- [x] Implement mandatory fallback checks and optional Lynis integration.
+- [x] Normalize all check output into findings.
+- [x] Generate plans containing only explicit low-risk action types.
+- [x] Implement interactive approval and non-interactive report-only behavior.
+- [x] Implement narrow, testable SSH and file-permission remediations.
+- [x] Re-run checks after the approval stage and compare results.
+- [x] Write raw JSON artifacts and a final Markdown report under `outputs/`.
+- [x] Wire `python -m src.main` and add CLI options.
+- [x] Add unit and end-to-end smoke tests that never require root.
+- [x] Refine README usage and safety documentation.
+- [x] Stream explicit observe, check, interpret, plan, approve, act, verify, and report stages from the runtime flow.
+- [x] Preserve check coverage, approval decisions, and targeted before/after verification in artifacts.
+- [x] Add tests for visible planning before approval and approved-action verification.
+- [x] Package the interactive audit workflow as the invokable `container-audit` Copilot skill.
 
 ## Assumptions
 
@@ -41,6 +45,8 @@ Run `python -m src.main`, inspect discovery and findings, choose report-only or 
 
 ## Milestones
 
-- [ ] Milestone 1: first complete report-only vertical slice.
-- [ ] Milestone 2: bounded approval and remediation with tests.
-- [ ] Milestone 3: documentation and final verification.
+- [x] Milestone 1: first complete report-only vertical slice.
+- [x] Milestone 2: bounded approval and remediation with tests.
+- [x] Milestone 3: documentation and final verification.
+
+The complete staged CLI loop and bounded remediation tests pass in a container. Final validation: 18 tests passed, shell syntax passed, static diagnostics were clean, and a live non-interactive run generated Markdown and JSON artifacts.

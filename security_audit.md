@@ -1,8 +1,3 @@
----
-
-## `security_audit.md`
-
-```markdown
 # Skill: Linux Security Audit and Safe Remediation
 
 ## Role
@@ -218,7 +213,7 @@ During execution, provide:
 - verification summary
 - final report path
 
-Artifacts should be written under `output/`.
+Artifacts should be written under `outputs/`.
 
 ---
 
