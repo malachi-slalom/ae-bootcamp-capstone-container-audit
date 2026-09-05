@@ -4,16 +4,19 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     openssh-server \
+    lynis \
     procps \
     iproute2 \
     net-tools \
     sudo \
     python3 \
     python3-pip \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Prepare ssh runtime dirs
-RUN mkdir -p /run/sshd /var/run/sshd
+# Prepare runtime dirs
+RUN mkdir -p /run/sshd /var/run/sshd /opt/demo /srv/demo /etc/issue.d
 
 # Intentionally insecure/demo-friendly SSH config
 RUN if [ -f /etc/ssh/sshd_config ]; then \
@@ -23,17 +26,31 @@ RUN if [ -f /etc/ssh/sshd_config ]; then \
       grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config; \
     fi
 
-# Create a low-hanging-fruit permissions issue
-RUN mkdir -p /opt/demo \
-    && echo "demo secret-ish file" > /opt/demo/insecure.txt \
-    && chmod 0666 /opt/demo/insecure.txt
+# World-writable demo files
+RUN echo "demo secret-ish file" > /opt/demo/insecure.txt \
+    && chmod 0666 /opt/demo/insecure.txt \
+    && echo "service demo file" > /srv/demo/public.txt \
+    && chmod 0666 /srv/demo/public.txt
 
-# Optional extra demo file
-RUN echo "hello from demo container" > /opt/demo/readme.txt
+# Deliberately weak umask in a demo-owned shell profile
+RUN echo 'umask 000' > /opt/demo/weak_profile.sh \
+    && chmod 0644 /opt/demo/weak_profile.sh
+
+# No login banner configured; create empty placeholders to make absence explicit
+RUN : > /etc/issue \
+    && : > /etc/issue.net
+
+# Do NOT install unattended-upgrades
+# Do NOT install aide
+# This omission is intentional for demo findings.
+
+# Simple content for the extra listener on port 8080
+RUN mkdir -p /opt/demo/www \
+    && echo "hello from the demo web service" > /opt/demo/www/index.html
 
 COPY docker/demo/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 22
+EXPOSE 22 8080
 
 ENTRYPOINT ["/entrypoint.sh"]

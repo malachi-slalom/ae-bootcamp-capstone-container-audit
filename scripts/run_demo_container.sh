@@ -10,7 +10,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 echo "[*] Building demo image: ${IMAGE_NAME}"
 docker build -t "${IMAGE_NAME}" -f "${REPO_ROOT}/docker/demo/Dockerfile" "${REPO_ROOT}"
 
-# Remove existing container if present
 if docker ps -a --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"; then
   echo "[*] Removing existing container: ${CONTAINER_NAME}"
   docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
@@ -20,6 +19,8 @@ echo "[*] Starting demo container: ${CONTAINER_NAME}"
 docker run -d \
   --name "${CONTAINER_NAME}" \
   --hostname "${CONTAINER_NAME}" \
+  -v "${REPO_ROOT}:/workspace" \
+  -w /workspace \
   "${IMAGE_NAME}" >/dev/null
 
 echo
@@ -31,12 +32,12 @@ echo "  docker exec -it ${CONTAINER_NAME} bash"
 echo "  docker logs ${CONTAINER_NAME}"
 echo "  docker rm -f ${CONTAINER_NAME}"
 echo
-echo "Quick checks inside the container:"
-echo "  cat /etc/os-release"
+echo "Suggested demo commands inside the container:"
+echo "  cd /workspace"
+echo "  lynis audit system --quick || true"
 echo "  grep -E '^(PermitRootLogin|PasswordAuthentication)' /etc/ssh/sshd_config"
-echo "  ls -l /opt/demo/insecure.txt"
-echo
-echo "To run your audit tooling inside the container, you can either:"
-echo "  1. docker cp your project into the container and run it there, or"
-echo "  2. mount your repo into a new container invocation, or"
-echo "  3. exec into the container and install/copy what you need."
+echo "  ls -l /opt/demo/insecure.txt /srv/demo/public.txt"
+echo "  cat /opt/demo/weak_profile.sh"
+echo "  ss -tulpn || netstat -tulpn || true"
+echo "  dpkg -l | grep -E 'unattended-upgrades|aide' || true"
+echo "  python3 -m src.main"
