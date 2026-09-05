@@ -28,6 +28,7 @@ Maintain a standard-library-only vertical slice that discovers the environment, 
 - [x] Show observe, reason, plan, ask, act, verify, and report as distinct runtime stages.
 - [x] Record approved and not-approved actions plus before/after findings in artifacts.
 - [x] Install development test dependencies in the demo image through an isolated virtual environment.
+- [x] Isolate the SSH orchestration test from intentionally insecure demo-container files.
 
 ## Assumptions
 
