@@ -46,6 +46,11 @@ The MVP must work even if:
 
 In these cases it should degrade gracefully and still produce a useful report.
 
+Container status must not globally disable remediation. Safe local actions may be
+offered when their action type and exact target are allowlisted, privileges are
+sufficient, and the user explicitly approves them. Host-level, disruptive, or
+unbounded changes remain recommendation-only.
+
 ---
 
 ## 3. Core Demo Story

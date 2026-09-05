@@ -71,6 +71,8 @@ class RemediationAction:
     description: str
     parameters: dict[str, Any]
     risk: Severity = Severity.LOW
+    finding_title: str = ""
+    evidence: str = ""
 
 
 @dataclass(frozen=True)
@@ -106,6 +108,7 @@ class AuditRun:
     planning_decisions: list[PlanningDecision]
     approval_mode: str
     approved_action_ids: list[str]
+    not_approved_action_ids: list[str]
     results: list[ActionResult]
     after_checks: list[RawCheck]
     after: list[Finding]

@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from .models import ActionResult, ActionType, EnvironmentInfo, RemediationAction
+from .policy import action_type_allowed, permission_path_allowed
 
 ROOT = Path(__file__).resolve().parents[1]
 SSH_OPTIONS = {"PermitRootLogin", "PasswordAuthentication"}
@@ -18,13 +19,23 @@ PACKAGES = {
 }
 
 
-def _authorized_path(action: RemediationAction, environment: EnvironmentInfo) -> Path | None:
+def _authorized_ssh_path(action: RemediationAction, environment: EnvironmentInfo) -> Path | None:
     requested = action.parameters.get("path")
     if not isinstance(requested, str) or environment.ssh_config_path is None:
         return None
     path = Path(requested).resolve()
     expected = Path(environment.ssh_config_path).resolve()
     return path if path == expected and path.is_file() else None
+
+
+def _authorized_permission_path(
+    action: RemediationAction, environment: EnvironmentInfo
+) -> Path | None:
+    requested = action.parameters.get("path")
+    if not isinstance(requested, str) or not permission_path_allowed(requested, environment):
+        return None
+    path = Path(requested).resolve()
+    return path if path.is_file() else None
 
 
 def _set_ssh_option(path: Path, option: str, value: str) -> tuple[bool, str]:
@@ -91,11 +102,16 @@ def _set_ssh_option(path: Path, option: str, value: str) -> tuple[bool, str]:
 def execute_action(action: RemediationAction, environment: EnvironmentInfo) -> ActionResult:
     if not environment.is_root:
         return ActionResult(action.action_id, False, False, "Remediation requires root privileges")
-    if environment.is_container:
-        return ActionResult(action.action_id, False, False, "Remediation is disabled in containers")
+    if not action_type_allowed(action.action_type, environment):
+        return ActionResult(
+            action.action_id,
+            False,
+            False,
+            "Action type is not approved for in-container remediation",
+        )
 
     if action.action_type == ActionType.SSH_SET_OPTION:
-        path = _authorized_path(action, environment)
+        path = _authorized_ssh_path(action, environment)
         option = action.parameters.get("option")
         value = action.parameters.get("value")
         if path is None or not isinstance(option, str) or not isinstance(value, str):
@@ -105,7 +121,7 @@ def execute_action(action: RemediationAction, environment: EnvironmentInfo) -> A
         return ActionResult(action.action_id, success, changed, message)
 
     if action.action_type == ActionType.SET_FILE_MODE:
-        path = _authorized_path(action, environment)
+        path = _authorized_permission_path(action, environment)
         mode = action.parameters.get("mode")
         if path is None or not isinstance(mode, int) or mode < 0 or mode > 0o777:
             return ActionResult(action.action_id, False, False, "File permission target is not allowlisted")

@@ -39,7 +39,14 @@ def choose_actions(
             return ApprovalMode.REPORT, []
         approved = []
         for action in actions:
-            answer = input_fn(f"Approve {action.description} [y/N]? ").strip().lower()
+            prompt = (
+                f"\nFinding: {action.finding_title or action.finding_id}\n"
+                f"Evidence: {action.evidence or 'See finding details above.'}\n"
+                f"Recommended fix: {action.description}\n"
+                f"Risk: {action.risk.value}; supported: yes\n"
+                "Approve this action [y/N]? "
+            )
+            answer = input_fn(prompt).strip().lower()
             if answer in {"y", "yes"}:
                 approved.append(action)
         return mode, approved

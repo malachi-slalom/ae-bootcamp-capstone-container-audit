@@ -173,6 +173,9 @@ In non-interactive mode:
 
 ### If running in a container
 - treat some host/service/kernel findings as possibly inapplicable
+- allow safe file-based remediations inside the container with explicit user approval
+- do not globally disable remediations in containers
+- classify remediation eligibility by allowlisted action type and target
 - explain limitations clearly
 - avoid pretending container-local changes equal full host hardening
 

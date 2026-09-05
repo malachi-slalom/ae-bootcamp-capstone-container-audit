@@ -30,6 +30,10 @@ def test_report_only_workflow_writes_before_after_artifacts(tmp_path: Path) -> N
     assert data["before_checks"] == data["after_checks"]
     assert data["approved_action_ids"] == []
     assert data["planning_decisions"]
+    report_content = report.read_text(encoding="utf-8")
+    assert "## Initial Findings" in report_content
+    assert "## Final Findings" in report_content
+    assert "Not approved:" in report_content
 
 
 def test_workflow_reports_agent_stages_in_order(tmp_path: Path) -> None:
@@ -49,10 +53,10 @@ def test_workflow_reports_agent_stages_in_order(tmp_path: Path) -> None:
     assert stages == [
         "observe",
         "observe",
-        "check",
-        "interpret",
+        "observe",
+        "reason",
         "plan",
-        "approve",
+        "ask",
         "act",
         "verify",
         "report",
@@ -81,6 +85,7 @@ def test_approved_action_is_rechecked_and_reported(tmp_path: Path) -> None:
     )
 
     assert run.approved_action_ids == ["action-1"]
+    assert run.not_approved_action_ids == []
     assert run.results[0].success is True
     assert run.verification_results[0].status == "resolved"
     assert run.resolved_finding_ids == ["ssh_permit_root_login"]
@@ -105,6 +110,6 @@ def test_cli_runs_non_interactively(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    for stage in ("observe", "check", "interpret", "plan", "approve", "act", "verify", "report"):
+    for stage in ("observe", "reason", "plan", "ask", "act", "verify", "report"):
         assert f"[{stage}]" in result.stdout
     assert list(tmp_path.glob("*.md"))

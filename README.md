@@ -30,7 +30,7 @@ The system does more than run a script:
 - re-checks and reports the outcome
 
 This forms a clear:
-**observe → plan → act → verify** loop.
+**observe → reason → plan → ask → act → verify → report** loop.
 
 ---
 
@@ -90,16 +90,16 @@ The command streams each stage as it occurs, including interpreted findings and 
 
 ## Checks and planning
 
-Fallback checks always run and cover SSH configuration, SSH config permissions, unattended-upgrades availability, Lynis availability, and execution privilege. If Lynis is installed, its quick audit also runs; a Lynis failure does not prevent fallback checks or reporting.
+Fallback checks always run and cover SSH configuration, SSH config permissions, the two explicit demo file paths, unattended-upgrades and AIDE availability, login banners, the demo profile umask, port 8080, Lynis availability, and execution privilege. If Lynis is installed, its quick audit also runs; a Lynis failure does not prevent fallback checks or reporting.
 
-Findings are normalized with severity, evidence, applicability, recommendation, and optional remediation type. Containers and unprivileged sessions still produce reports, but no remediation plan is executable in those environments.
+Findings are normalized with severity, evidence, applicability, recommendation, and optional remediation type. In root containers, typed low-risk actions may be proposed for explicit SSH settings, the two demo file paths, and supported package installation. Host-level or disruptive findings remain recommendation-only. Unprivileged sessions still produce reports but cannot execute remediations.
 
 ## Safety boundaries
 
 The executor accepts only fixed action types for:
 
 - setting `PermitRootLogin no` or `PasswordAuthentication no` in the discovered SSH config
-- removing group/world write bits from that exact SSH config path
+- removing group/world write bits from the discovered SSH config or the exact demo paths `/opt/demo/insecure.txt` and `/srv/demo/public.txt`
 - installing `lynis` or `unattended-upgrades` with `apt-get`
 
 Approval is mandatory. Non-interactive runs default to report-only unless `--mode apply` is explicitly supplied. The project never executes model-generated commands and does not modify PAM, firewall rules, sysctls, users, passwords, or broad filesystem trees.

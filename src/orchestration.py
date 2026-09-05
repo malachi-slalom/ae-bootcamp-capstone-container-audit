@@ -62,9 +62,13 @@ def run_audit(
     )
 
     raw_checks = run_checks(discovered)
-    _report(reporter, "check", f"Completed {len(raw_checks)} check(s); fallback checks always ran.")
+    _report(
+        reporter,
+        "observe",
+        f"Completed {len(raw_checks)} check(s); fallback checks always ran.",
+    )
     before = normalize_findings(raw_checks, discovered)
-    _report(reporter, "interpret", _finding_summary(before))
+    _report(reporter, "reason", _finding_summary(before))
 
     plan = build_plan(before, discovered)
     planning_decisions = explain_plan(before, discovered, plan)
@@ -72,7 +76,7 @@ def run_audit(
     approval_mode, approved = choose_actions(plan, requested_mode, interactive=interactive)
     _report(
         reporter,
-        "approve",
+        "ask",
         f"Mode={approval_mode.value}; approved {len(approved)} of {len(plan)} safe action(s).",
     )
     results = execute_actions(approved, discovered)
@@ -118,6 +122,9 @@ def run_audit(
         planning_decisions=planning_decisions,
         approval_mode=approval_mode.value,
         approved_action_ids=[action.action_id for action in approved],
+        not_approved_action_ids=[
+            action.action_id for action in plan if action not in approved
+        ],
         results=results,
         after_checks=verification_checks,
         after=after,

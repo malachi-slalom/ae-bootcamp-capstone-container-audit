@@ -63,6 +63,14 @@ def write_artifacts(run: AuditRun, output_dir: Path) -> AuditRun:
         lines.append(
             f"- `{decision.finding_id}`: **{decision.disposition}**{action}. {decision.reason}"
         )
+        if decision.action_id:
+            planned_action = next(
+                action for action in run.plan if action.action_id == decision.action_id
+            )
+            lines.append(
+                f"  - Type: `{planned_action.action_type.value}`; "
+                f"risk: `{planned_action.risk.value}`; fix: {planned_action.description}"
+            )
     if not run.planning_decisions:
         lines.append("No remediation decisions were needed.")
     lines.extend(
@@ -72,6 +80,7 @@ def write_artifacts(run: AuditRun, output_dir: Path) -> AuditRun:
         "",
         f"Approval mode: `{run.approval_mode}`",
         f"Approved actions: {', '.join(run.approved_action_ids) or 'none'}",
+        f"Not approved: {', '.join(run.not_approved_action_ids) or 'none'}",
         "",
         ]
     )
@@ -97,7 +106,9 @@ def write_artifacts(run: AuditRun, output_dir: Path) -> AuditRun:
             f"- `{verification.action_id}` / `{verification.finding_id}`: "
             f"**{verification.status}**. {verification.message}"
         )
-    lines.extend(["", *_finding_lines(run.after), "## Limitations", ""])
+    lines.extend(
+        ["", "## Final Findings", "", *_finding_lines(run.after), "## Limitations", ""]
+    )
     limitations = list(environment.limitations)
     if environment.is_container:
         limitations.append("Container-local results do not represent host hardening.")

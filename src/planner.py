@@ -11,15 +11,20 @@ from .models import (
     RemediationAction,
     Severity,
 )
+from .policy import action_type_allowed, permission_path_allowed
 
 
 def build_plan(findings: list[Finding], environment: EnvironmentInfo) -> list[RemediationAction]:
-    if not environment.is_root or environment.is_container:
+    if not environment.is_root:
         return []
 
     actions: list[RemediationAction] = []
     for finding in findings:
-        if not finding.auto_remediation or finding.applicability != Applicability.APPLICABLE:
+        if (
+            not finding.auto_remediation
+            or finding.applicability != Applicability.APPLICABLE
+            or not action_type_allowed(finding.auto_remediation, environment)
+        ):
             continue
 
         parameters: dict[str, object] = {}
@@ -31,7 +36,7 @@ def build_plan(findings: list[Finding], environment: EnvironmentInfo) -> list[Re
             parameters = {"path": path, "option": option, "value": "no"}
         elif finding.auto_remediation == ActionType.SET_FILE_MODE:
             path = finding.metadata.get("path")
-            if not isinstance(path, str):
+            if not isinstance(path, str) or not permission_path_allowed(path, environment):
                 continue
             current_mode = finding.metadata.get("mode")
             if not isinstance(current_mode, int):
@@ -50,6 +55,8 @@ def build_plan(findings: list[Finding], environment: EnvironmentInfo) -> list[Re
             description=finding.recommendation,
             parameters=parameters,
             risk=Severity.LOW,
+            finding_title=finding.title,
+            evidence=finding.evidence,
         ))
     return actions
 
@@ -74,11 +81,15 @@ def explain_plan(
             decisions.append(PlanningDecision(
                 finding.finding_id, "not_applicable", "The finding does not apply to this environment."
             ))
-        elif environment.is_container:
+        elif (
+            environment.is_container
+            and finding.auto_remediation is not None
+            and not action_type_allowed(finding.auto_remediation, environment)
+        ):
             decisions.append(PlanningDecision(
                 finding.finding_id,
                 "report_only",
-                "Automatic remediation is disabled in containers.",
+                "This action type is not approved for in-container remediation.",
             ))
         elif not environment.is_root and finding.auto_remediation:
             decisions.append(PlanningDecision(

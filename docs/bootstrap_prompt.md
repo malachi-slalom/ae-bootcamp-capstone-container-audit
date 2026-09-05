@@ -1,7 +1,7 @@
 You are implementing a small proof-of-concept project for an Agentic Engineering course.
 
 Read and follow these files as the source of truth:
-- development_spec.md
+- docs/development_spec.md
 - security_audit.md
 - README.md
 
@@ -112,7 +112,7 @@ Definition of done:
 - The CLI runs the complete flow.
 - Core tests pass.
 - The repo contains the required docs, scripts, source files, and artifacts structure.
-- The implementation matches the intent of development_spec.md and security_audit.md.
+- The implementation matches the intent of docs/development_spec.md and security_audit.md.
 
 Begin now by:
 1. reviewing the repository state,
